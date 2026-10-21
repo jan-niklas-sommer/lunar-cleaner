@@ -49,10 +49,16 @@ fn main() {
 /// Kamera knapp über dem Boden am Regionsrand, Blick zum Mittelpunkt, wo
 /// später das Start-Depot steht.
 fn spawn_preview_camera(mut commands: Commands, region: Res<moon_surface::PlayRegion>) {
-    let ground = moon_surface::ground_height(&region.0, 0.0, 0.0);
+    // Bodenhöhe AN der Kamerastelle messen, nicht am Mittelpunkt (dort ist
+    // sie per Definition 0) — sonst spawnt die Kamera in Kraterwänden.
+    // 250 m Puffer, weil das Vorschau-Mesh die Höhe nur am 16-m-Raster
+    // interpoliert und echte Kraterwände dazwischen höher liegen können.
+    let (x, z) = (-1_200.0, -1_200.0);
+    let ground = moon_surface::ground_height(&region.0, x, z);
+    let center = moon_surface::ground_height(&region.0, 0.0, 0.0);
     fly_camera::spawn_camera(
         &mut commands,
-        Vec3::new(-1_200.0, ground + 320.0, -1_200.0),
-        Vec3::new(0.0, ground + 40.0, 0.0),
+        Vec3::new(x as f32, ground as f32 + 250.0, z as f32),
+        Vec3::new(0.0, center as f32 + 40.0, 0.0),
     );
 }

@@ -11,10 +11,14 @@ use bevy::prelude::*;
 use crate::moon_data::{self, Region};
 use crate::palette;
 
-/// Kantenlänge der Startregion in Metern.
-pub const REGION_SIZE: f64 = 4_096.0;
-/// Auflösung des Vorschau-Meshes (Meter pro Quad).
-const MESH_STEP: f64 = 8.0;
+/// Kantenlänge der Startregion in Metern: 7 km × 7 km ≈ 49 km² (Zielgröße
+/// laut `design_wirtschaft_und_progression.md`, ~50 km²).
+pub const REGION_SIZE: f64 = 7_000.0;
+/// Auflösung des Vorschau-Meshes (Meter pro Quad). Grob gewählt, damit das
+/// 49-km²-Mesh beim Start schnell steht; dieses Mesh dient später als
+/// Fern-LOD, während die feinen `DustChunk`s (0,5 m) nahe an der Kamera
+/// übernehmen.
+const MESH_STEP: f64 = 16.0;
 
 /// Die Spielregion; von `main` eingesetzt, überall lesbar.
 #[derive(Resource)]

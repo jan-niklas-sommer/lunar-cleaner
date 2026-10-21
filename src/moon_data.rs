@@ -152,11 +152,13 @@ impl Region {
         lon_lat(self.dir(x, z))
     }
 
-    /// Höhe in Metern über der Tangentialebene durch den Mittelpunkt
-    /// (Mondkrümmung herausgerechnet, die Region liegt „flach“).
+    /// Höhe in Metern, Null am Regionsmittelpunkt. Die echte Mondkrümmung
+    /// bleibt drin: Die Region ist ein Stück Kugeloberfläche, kein flaches
+    /// Brett — 3,5 km vom Mittelpunkt liegt man 3,5 m „unter der Waage“,
+    /// was am Horizont (Sichtweite ~2,6 km bei 2 m Augenhöhe) den Rand der
+    /// Welt hinter dem Horizont verschwinden lässt.
     pub fn height(&self, x: f64, z: f64) -> f64 {
-        let dir = self.dir(x, z);
-        elevation(dir) + MOON_RADIUS * (dir.dot(self.center) - 1.0)
+        elevation(self.dir(x, z)) - elevation(self.center)
     }
 }
 
@@ -174,14 +176,15 @@ mod tests {
         let region = apollo_11(4_096.0);
         assert!(mare(region.center) > 0.8, "Mare Tranquillitatis");
 
-        // Die Region liegt um die echte Höhe herum, ohne Ausreißer:
-        // Krater bis ~75 m, LOLA-Variation im Mare gering.
+        // Die Region liegt um die Höhe des Mittelpunkts herum, ohne
+        // Ausreißer: Krater bis ~75 m, LOLA-Variation im Mare gering.
         let real = height_maps::moon().height(region.center);
         for &(x, z) in &[(0.0, 0.0), (1_000.0, -500.0), (-2_000.0, 1_500.0)] {
             let h = region.height(x, z);
+            let expected = height_maps::moon().height(region.dir(x, z)) - real;
             assert!(
-                (real - 120.0..real + 120.0).contains(&h),
-                "({x}, {z}): {h} vs. echte Höhe {real}"
+                (h - expected).abs() < 10.0,
+                "({x}, {z}): {h} vs. erwartet {expected}"
             );
         }
     }
