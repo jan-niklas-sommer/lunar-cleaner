@@ -1,0 +1,21 @@
+[package]
+name = "lunar_cleaner"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Strikt gepinnt: der existierende Code (height_maps, world_origin, starfield,
+# sky) ist gegen diese Version geschrieben und kompiliert garantiert dagegen.
+bevy = "=0.20.0"
+
+[features]
+# Schnellere Inkremental-Builds in der Entwicklung: `cargo run --features dev`.
+# Niemals ausliefern damit (benötigt die Bevy-DLL neben der exe).
+dev = ["bevy/dynamic_linking"]
+
+# Dependencies auch im Debug-Build optimieren; sonst ist Bevy unbenutzbar langsam.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

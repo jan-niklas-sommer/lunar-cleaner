@@ -1,0 +1,15 @@
+# Rust
+/target
+
+# Blender-Backups
+*.blend1
+
+# Betriebssystem
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDEs / Editoren
+.idea/
+.vscode/
+*.swp
